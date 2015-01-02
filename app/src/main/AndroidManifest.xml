@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="android.com.soundrecorder" >
+
+    <application
+        android:allowBackup="true"
+        android:icon="@drawable/ic_launcher"
+        android:label="@string/app_name"
+        android:theme="@style/AppTheme" >
+        <activity
+            android:name=".SoundRecorderActivity"
+            android:label="@string/app_name" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".SoundListActivity"
+            android:label="@string/title_sound_list"
+            android:parentActivityName=".SoundRecorderActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="android.com.soundrecorder.SoundRecorderActivity" />
+        </activity>
+        <activity
+            android:name=".SoundDetailActivity"
+            android:label="@string/title_sound_detail"
+            android:parentActivityName=".SoundListActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="android.com.soundrecorder.SoundListActivity" />
+        </activity>
+    </application>
+
+</manifest>
