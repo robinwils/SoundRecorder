@@ -7,9 +7,6 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
-
-import android.com.soundrecorder.dummy.SoundListContent;
-
 /**
  * A list fragment representing a list of Sounds. This fragment
  * also supports tablet devices by allowing list items to be given an
@@ -47,7 +44,7 @@ public class SoundListFragment extends ListFragment {
         /**
          * Callback for when an item has been selected.
          */
-        public void onItemSelected(String id);
+        public void onItemSelected(int id);
     }
 
     /**
@@ -56,7 +53,7 @@ public class SoundListFragment extends ListFragment {
      */
     private static Callbacks sDummyCallbacks = new Callbacks() {
         @Override
-        public void onItemSelected(String id) {
+        public void onItemSelected(int id) {
         }
     };
 
@@ -71,12 +68,11 @@ public class SoundListFragment extends ListFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // TODO: replace with a real list adapter.
-        setListAdapter(new ArrayAdapter<SoundListContent.SoundListItem>(
+        setListAdapter(new ArrayAdapter<SoundListItem>(
                 getActivity(),
                 android.R.layout.simple_list_item_activated_1,
                 android.R.id.text1,
-                SoundListContent.ITEMS));
+                SoundListContent.getInstance().items));
     }
 
     @Override
@@ -116,7 +112,7 @@ public class SoundListFragment extends ListFragment {
 
         // Notify the active callbacks interface (the activity, if the
         // fragment is attached to one) that an item has been selected.
-        mCallbacks.onItemSelected(SoundListContent.ITEMS.get(position).id);
+        mCallbacks.onItemSelected(position);
     }
 
     @Override

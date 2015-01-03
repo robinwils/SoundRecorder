@@ -39,8 +39,8 @@ public class SoundDetailActivity extends ActionBarActivity {
             // Create the detail fragment and add it to the activity
             // using a fragment transaction.
             Bundle arguments = new Bundle();
-            arguments.putString(SoundDetailFragment.ARG_ITEM_ID,
-                    getIntent().getStringExtra(SoundDetailFragment.ARG_ITEM_ID));
+            arguments.putInt(SoundDetailFragment.ARG_ITEM_ID,
+                    getIntent().getIntExtra(SoundDetailFragment.ARG_ITEM_ID, -1));
             SoundDetailFragment fragment = new SoundDetailFragment();
             fragment.setArguments(arguments);
             getSupportFragmentManager().beginTransaction()

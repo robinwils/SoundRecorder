@@ -1,6 +1,7 @@
 package android.com.soundrecorder;
 
 import android.os.Environment;
+import android.os.PatternMatcher;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -34,5 +35,22 @@ public class MyUtils {
     public static String getTempSoundFile()
     {
         return Environment.getExternalStorageDirectory() + "/temp.3gp";
+    }
+
+    public static String getSRDir()
+    {
+        return Environment.getExternalStorageDirectory() + "/sr/";
+    }
+
+    public static File[] listSoundsDirectory()
+    {
+        File f = new File(getSRDir());
+        File[] files = f.listFiles();
+        for (File inFile : files) {
+            if (inFile.isDirectory()) {
+                // is directory
+            }
+        }
+        return files;
     }
 }

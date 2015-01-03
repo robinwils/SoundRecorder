@@ -78,13 +78,13 @@ public class SoundListActivity extends ActionBarActivity
      * indicating that the item with the given ID was selected.
      */
     @Override
-    public void onItemSelected(String id) {
+    public void onItemSelected(int id) {
         if (mTwoPane) {
             // In two-pane mode, show the detail view in this activity by
             // adding or replacing the detail fragment using a
             // fragment transaction.
             Bundle arguments = new Bundle();
-            arguments.putString(SoundDetailFragment.ARG_ITEM_ID, id);
+            arguments.putInt(SoundDetailFragment.ARG_ITEM_ID, id);
             SoundDetailFragment fragment = new SoundDetailFragment();
             fragment.setArguments(arguments);
             getSupportFragmentManager().beginTransaction()
