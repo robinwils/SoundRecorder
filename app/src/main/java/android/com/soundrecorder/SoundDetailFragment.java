@@ -8,7 +8,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 
-import android.com.soundrecorder.dummy.DummyContent;
+import android.com.soundrecorder.dummy.SoundListContent;
 
 /**
  * A fragment representing a single Sound detail screen.
@@ -26,7 +26,7 @@ public class SoundDetailFragment extends Fragment {
     /**
      * The dummy content this fragment is presenting.
      */
-    private DummyContent.DummyItem mItem;
+    private SoundListContent.SoundListItem mItem;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -43,7 +43,7 @@ public class SoundDetailFragment extends Fragment {
             // Load the dummy content specified by the fragment
             // arguments. In a real-world scenario, use a Loader
             // to load content from a content provider.
-            mItem = DummyContent.ITEM_MAP.get(getArguments().getString(ARG_ITEM_ID));
+            mItem = SoundListContent.ITEM_MAP.get(getArguments().getString(ARG_ITEM_ID));
         }
     }
 
