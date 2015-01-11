@@ -2,12 +2,14 @@ package android.com.soundrecorder;
 
 import android.app.DialogFragment;
 import android.content.Intent;
+import android.content.IntentSender;
+import android.content.SharedPreferences;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
-import android.os.Environment;
-import android.os.SystemClock;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.os.SystemClock;
+import android.preference.PreferenceManager;
+import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -16,20 +18,46 @@ import android.webkit.MimeTypeMap;
 import android.widget.Button;
 import android.widget.Chronometer;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesUtil;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.drive.Drive;
+import com.google.android.gms.drive.DriveApi;
+import com.google.android.gms.drive.DriveFolder;
+import com.google.android.gms.drive.MetadataBuffer;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.UUID;
 
 
 public class SoundRecorderActivity extends ActionBarActivity
-        implements PlaybackDialog.NoticeDialogListener {
+        implements PlaybackDialog.NoticeDialogListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
     private static final String LOG_TAG = "SoundRecorder";
+    private static final int RESOLVE_CONNECTION_REQUEST_CODE = 1;
     private Button sounds_button;
     private Button record_button;
     private Chronometer chrono;
     private MediaPlayer mPlayer;
     private String mFileName;
     private MediaRecorder mRecorder;
+    protected GoogleApiClient mGoogleApiClient;
+    protected MetadataBuffer metadataBuffer;
+    private String mNextPageToken;
+
+    private final ResultCallback<DriveApi.MetadataBufferResult> metadataBufferCallback = new ResultCallback<DriveApi.MetadataBufferResult>() {
+        @Override
+        public void onResult(DriveApi.MetadataBufferResult result) {
+            if (!result.getStatus().isSuccess()) {
+                Log.d(LOG_TAG, "PROBLEM ON RESULT");
+                return;
+            }
+            Log.d(LOG_TAG, new Integer(result.getMetadataBuffer().getCount()).toString());
+            metadataBuffer = result.getMetadataBuffer();
+            SoundListContent.getInstance().items.clear();
+        }
+    };
 
     private void onRecord(boolean start) {
         if (start) {
@@ -95,10 +123,23 @@ public class SoundRecorderActivity extends ActionBarActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.d(LOG_TAG, "ALLOOOO");
         setContentView(R.layout.activity_sound_recorder);
+        if (SoundListContent.getInstance().soundRecorderActivity == null)
+            SoundListContent.getInstance().setSoundRecorderActivity(this);
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
-        mFileName = Environment.getExternalStorageDirectory().getAbsolutePath();
-        mFileName += "/temp.3gp";
+        if (sharedPreferences.getBoolean("sync", false))
+            mGoogleApiClient = new GoogleApiClient.Builder(this)
+                    .addApi(Drive.API)
+                    .addScope(Drive.SCOPE_FILE)
+                    .addConnectionCallbacks(this)
+                    .addOnConnectionFailedListener(this)
+                    .build();
+
+
+        new File(MyUtils.getSRDir()).mkdirs();
+        mFileName = MyUtils.getTempSoundFile();
 
         sounds_button = (Button) findViewById(R.id.sounds_button);
         sounds_button.setOnClickListener(new View.OnClickListener() {
@@ -140,7 +181,9 @@ public class SoundRecorderActivity extends ActionBarActivity
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
-            return true;
+            Intent settings = new Intent(this, SettingsActivity.class);
+            startActivityForResult(settings, 42);
+
         }
 
         return super.onOptionsItemSelected(item);
@@ -149,11 +192,9 @@ public class SoundRecorderActivity extends ActionBarActivity
     @Override
     public void onDialogPositiveClick(DialogFragment dialog) {
         PlaybackDialog d = (PlaybackDialog) dialog;
-        String save_dir = Environment.getExternalStorageDirectory() + "/sr/";
+        String save_dir = MyUtils.getSRDir();
         String filename = d.filename == null || d.filename.length() == 0 ?
                 UUID.randomUUID().toString() : d.filename;
-        File directory = new File(save_dir);
-        directory.mkdir();
         try {
             String ext = MimeTypeMap.getFileExtensionFromUrl(new File(mFileName).toURI().toURL().toString());
             MyUtils.copyFile(mFileName, save_dir + filename + "." + ext);
@@ -162,8 +203,72 @@ public class SoundRecorderActivity extends ActionBarActivity
         }
     }
 
+    public void startDriveService() {
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .addApi(Drive.API)
+                .addScope(Drive.SCOPE_FILE)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .build();
+        mGoogleApiClient.connect();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        if (sharedPreferences.getBoolean("sync", false) && mGoogleApiClient != null)
+            mGoogleApiClient.connect();
+    }
+
     @Override
     public void onDialogNegativeClick(DialogFragment dialog) {
+
+    }
+
+    @Override
+    public void onConnected(Bundle bundle) {
+        DriveFolder driveFolder = Drive.DriveApi.getRootFolder(mGoogleApiClient);
+
+        driveFolder.listChildren(mGoogleApiClient).setResultCallback(metadataBufferCallback);
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+
+    }
+
+    @Override
+    public void onConnectionFailed(ConnectionResult connectionResult) {
+        if (connectionResult.hasResolution()) {
+            try {
+                connectionResult.startResolutionForResult(this, RESOLVE_CONNECTION_REQUEST_CODE);
+            } catch (IntentSender.SendIntentException e) {
+                // Unable to resolve, message user appropriately
+            }
+        } else {
+            GooglePlayServicesUtil.getErrorDialog(connectionResult.getErrorCode(), this, 0).show();
+        }
+
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch (requestCode) {
+            case RESOLVE_CONNECTION_REQUEST_CODE:
+                if (resultCode == RESULT_OK) {
+                    mGoogleApiClient.connect();
+                }
+                break;
+            case 42:
+                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+                if (sharedPreferences.getBoolean("sync", false))
+                    startDriveService();
+                SoundListContent.getInstance().showExt = sharedPreferences.getBoolean("ext", true);
+                SoundListContent.getInstance().sync = sharedPreferences.getBoolean("sync", false);
+                break;
+        }
 
     }
 }

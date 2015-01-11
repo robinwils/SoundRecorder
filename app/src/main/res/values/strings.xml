@@ -12,8 +12,14 @@
     <string name="button_keep">KEEP</string>
     <string name="button_discard">DISCARD</string>
     <string name="button_play">PLAY</string>
+    <string name="button_save_drive">SAVE ON DRIVE</string>
     <string name="dialog_keep_sound">Keep sound ?</string>
     <string name="edit_enter_filename">Enter filename</string>
+    <string name="preference_sync">Use Drive storage</string>
+    <string name="preference_ext">Show file extensions</string>
+    <string name="preference_ext_desc">Display the file extension after the filename</string>
+    <string name="preference_sync_desc">Sync all files on Drive</string>
+
 
 
 </resources>

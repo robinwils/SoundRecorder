@@ -2,6 +2,7 @@ package android.com.soundrecorder;
 
 import android.os.Environment;
 import android.os.PatternMatcher;
+import android.util.Log;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -39,11 +40,14 @@ public class MyUtils {
 
     public static String getSRDir()
     {
-        return Environment.getExternalStorageDirectory() + "/sr/";
+        String res = Environment.getExternalStorageDirectory() + "/sr/";
+        Log.d("SoundRecorder", res);
+        return res;
     }
 
     public static File[] listSoundsDirectory()
     {
+        Log.d("SoundRecorder", "ca lit la: " + getSRDir());
         File f = new File(getSRDir());
         File[] files = f.listFiles();
         for (File inFile : files) {

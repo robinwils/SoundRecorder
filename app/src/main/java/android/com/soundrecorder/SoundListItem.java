@@ -1,5 +1,11 @@
 package android.com.soundrecorder;
 
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
+
+import com.google.android.gms.drive.Metadata;
+
 import java.io.File;
 
 /**
@@ -8,10 +14,21 @@ import java.io.File;
 public class SoundListItem {
     private final int id;
     private final File file;
+    private final Metadata metadata;
+    private boolean showExt;
 
-    public SoundListItem(int id, File file) {
+    public SoundListItem(int id, File file, boolean showExt) {
         this.id = id;
         this.file = file;
+        this.showExt = showExt;
+        this.metadata = null;
+    }
+
+    public SoundListItem(int id, Metadata metadata, boolean showExt) {
+        this.id = id;
+        this.metadata = metadata;
+        this.file = null;
+        this.showExt = showExt;
     }
 
     public int getId() {
@@ -19,7 +36,7 @@ public class SoundListItem {
     }
 
     public String getAbsolutePath() {
-        return file.getAbsolutePath();
+        return file != null ? file.getAbsolutePath() : null;
     }
     /**
      * Returns a string containing a concise, human-readable description of this
@@ -36,6 +53,22 @@ public class SoundListItem {
      */
     @Override
     public String toString() {
-        return file.getName();
+        String name = file == null ? metadata.getTitle() : file.getName();
+        if (showExt || !name.contains("."))
+            return name;
+        else
+            return name.substring(0, name.lastIndexOf("."));
+    }
+
+    public File getFile() {
+        return file;
+    }
+
+    public void setShowExt(boolean showExt) {
+        this.showExt = showExt;
+    }
+
+    public Metadata getMetadata() {
+        return metadata;
     }
 }

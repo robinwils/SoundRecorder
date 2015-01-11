@@ -22,18 +22,6 @@
             android:layout_weight="0.15"
             android:textSize="@dimen/abc_text_size_display_3_material" />
 
-        <TextView
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceLarge"
-            android:text="@string/main_string"
-            android:id="@+id/main_text"
-            android:textSize="@dimen/abc_action_bar_stacked_max_height"
-            android:layout_alignBaseline="@+id/sounds_button"
-            android:layout_alignBottom="@+id/sounds_button"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentEnd="true" />
-
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
